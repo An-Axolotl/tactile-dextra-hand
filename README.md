@@ -72,3 +72,7 @@ pip install pillow schemdraw matplotlib    # in a venv
 python tools/make_grid.py ~/Downloads      # folder holding the source photos -> images/photo_grid.jpg
 python tools/make_circuit.py               # -> images/circuit.png, images/circuit.svg
 ```
+
+## License
+
+[MIT](LICENSE)
