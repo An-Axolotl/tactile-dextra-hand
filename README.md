@@ -33,15 +33,35 @@ V_pin = 5V · 200kΩ / (R_FSR + 200kΩ)
 
 With no load the FSR is open circuit (≫1 MΩ), so the pin reads about 0. Pressing lowers R_FSR, and the reading rises toward 1023. Using two 100 kΩ resistors (200 kΩ total) instead of the usual ~10 kΩ is what lets the hand feel light touches. Even a small drop in R_FSR produces a clear voltage change. The trade-off is that readings saturate sooner under heavy force.
 
-## Firmware
+## Reading the sensors
 
-`firmware/TripleFingerPadTouch/TripleFingerPadTouch.ino` reads A0–A5 and prints one line per sample at 9600 baud, in the order palm, thumb, index, middle, ring, pinky:
+**1. Flash the Arduino.** Open `firmware/TripleFingerPadTouch/TripleFingerPadTouch.ino` in the Arduino IDE and upload it. It works on any board with A0–A5 (tested by compiling for Uno and Mega). Each loop reads all six sensors into one snapshot and prints them as a single line at **115200 baud**, in the order palm, thumb, index, middle, ring, pinky:
 
 ```
 Palm:0, Thumb:412, Index:0, Middle:388, Ring:0, Pinky:0
 ```
 
-Upload it with the Arduino IDE, then open the Serial Monitor/Plotter at 9600 baud.
+The Arduino IDE's Serial Plotter (115200 baud) graphs all six channels directly.
+
+**2. Read them on the computer:**
+
+```bash
+pip install pyserial
+python tools/read_fsr.py                          # auto-detects the Arduino, live bar per sensor
+python tools/read_fsr.py --csv touch_log.csv      # also log every sample (time_s + 6 readings)
+python tools/read_fsr.py --port /dev/ttyACM0 --threshold 50
+```
+
+```
+  Palm    0 ······························
+ Thumb  412 ████████████·················· TOUCH
+ Index    0 ······························
+Middle  388 ███████████··················· TOUCH
+  Ring    0 ······························
+ Pinky    0 ······························
+```
+
+Readings run from 0 (no touch) to 1023 (saturated). Each channel is read twice per sample and the first reading is thrown away. The 200 kΩ dividers are high impedance, so this stops one channel's value bleeding into the next.
 
 ## Regenerating the figures
 

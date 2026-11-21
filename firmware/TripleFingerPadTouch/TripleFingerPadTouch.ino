@@ -13,12 +13,23 @@
 // The large 200k bottom resistor (2 x 100k) makes light touches show up
 // clearly, but readings saturate sooner under heavy force.
 //
-// Output: one line per sample at 9600 baud, e.g.
+// Each loop reads all 6 sensors into a snapshot first, then prints them
+// together, so every line is one consistent sample of the whole hand.
+//
+// High-impedance dividers (FSR + 200k) are slower to charge the ADC's sample
+// capacitor than the ~10k source the ATmega expects, so after switching
+// channels the first reading can pick up some of the previous channel
+// (crosstalk). Each channel is read twice and the first reading is discarded.
+//
+// Output: one line per sample at 115200 baud (Serial Monitor / Plotter), e.g.
 //   Palm:0, Thumb:412, Index:0, Middle:388, Ring:0, Pinky:0
 
-const int fsrPins[6] = {A0, A1, A2, A3, A4, A5};
+const int NUM_SENSORS = 6;
+const long BAUD_RATE = 115200;
 
-enum Finger {
+const int fsrPins[NUM_SENSORS] = {A0, A1, A2, A3, A4, A5};
+
+enum Sensor {
   INDEX = 0,
   MIDDLE = 1,
   THUMB = 2,
@@ -27,7 +38,7 @@ enum Finger {
   PINKY = 5
 };
 
-const char* fingerNames[6] = {
+const char* sensorNames[NUM_SENSORS] = {
   "Index",
   "Middle",
   "Thumb",
@@ -36,32 +47,34 @@ const char* fingerNames[6] = {
   "Pinky"
 };
 
-// Desired output order
-const int printOrder[6] = {
-  PALM,
-  THUMB,
-  INDEX,
-  MIDDLE,
-  RING,
-  PINKY
-};
+// Print order: palm first, then thumb to pinky
+const int printOrder[NUM_SENSORS] = {PALM, THUMB, INDEX, MIDDLE, RING, PINKY};
+
+int readings[NUM_SENSORS];
+
+int readSettled(int pin) {
+  analogRead(pin);              // discard: lets the ADC sample cap settle on this channel
+  delayMicroseconds(50);
+  return analogRead(pin);
+}
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(BAUD_RATE);
 }
 
 void loop() {
-  for (int i = 0; i < 6; i++) {
+  // 1) snapshot all sensors
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    readings[i] = readSettled(fsrPins[i]);
+  }
+
+  // 2) print the snapshot as one line
+  for (int i = 0; i < NUM_SENSORS; i++) {
     int idx = printOrder[i];
-    int v = analogRead(fsrPins[idx]);
-
-    int contact = (v > 0) ? 1 : 0;
-
-    Serial.print(fingerNames[idx]);
-    Serial.print(":");
-    Serial.print(v);
-
-    if (i < 5) Serial.print(", ");
+    Serial.print(sensorNames[idx]);
+    Serial.print(':');
+    Serial.print(readings[idx]);
+    if (i < NUM_SENSORS - 1) Serial.print(", ");
   }
   Serial.println();
 }
