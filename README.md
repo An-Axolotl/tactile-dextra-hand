@@ -2,18 +2,24 @@
 
 ![Tactile robot hand: open hand with 5 fingertip FSRs and a palm FSR, grasping a cube, a pineapple and a strawberry, and mounted on a humanoid](images/photo_grid.jpg)
 
-A 5-finger hand with force-sensitive resistors (FSRs): one round FSR on each fingertip and one square FSR on the palm. An Arduino reads all six sensors and streams them over serial.
+This project shows a simple, cheap way to give a robot hand a sense of touch with off-the-shelf force-sensitive resistors (FSRs). There's one round FSR on each fingertip and one square FSR on the palm. Each sensor feeds a voltage divider built from two 100 kΩ resistors, which makes the hand respond to light touches. An Arduino reads all six channels and streams them over serial.
+
+**Parts**
+- 5× [round FSR, Pololu #1696](https://www.pololu.com/product/1696/) (fingertips)
+- 1× [square FSR, Pololu #1645](https://www.pololu.com/product/1645) (palm)
+- 12× 100 kΩ resistors (2 per sensor)
+- 1× Arduino with 6 analog inputs (A0–A5)
 
 ## Sensors
 
 | Location | Sensor | Arduino pin |
 |---|---|---|
-| Index | round FSR (Pololu) | A0 |
-| Middle | round FSR (Pololu) | A1 |
-| Thumb | round FSR (Pololu) | A2 |
-| Palm | square FSR | A3 |
-| Ring | round FSR (Pololu) | A4 |
-| Pinky | round FSR (Pololu) | A5 |
+| Index | [round FSR](https://www.pololu.com/product/1696/) | A0 |
+| Middle | [round FSR](https://www.pololu.com/product/1696/) | A1 |
+| Thumb | [round FSR](https://www.pololu.com/product/1696/) | A2 |
+| Palm | [square FSR](https://www.pololu.com/product/1645) | A3 |
+| Ring | [round FSR](https://www.pololu.com/product/1696/) | A4 |
+| Pinky | [round FSR](https://www.pololu.com/product/1696/) | A5 |
 
 ## Circuit
 
@@ -25,7 +31,7 @@ Each sensor is one voltage divider. The FSR runs from 5V to its analog pin, and 
 V_pin = 5V · 200kΩ / (R_FSR + 200kΩ)
 ```
 
-With no load the FSR is open circuit (≫1 MΩ), so the pin reads about 0. Pressing lowers R_FSR, and the reading rises toward 1023. The large 200 kΩ pull-down makes the sensor respond to light touches but saturate early under heavy force.
+With no load the FSR is open circuit (≫1 MΩ), so the pin reads about 0. Pressing lowers R_FSR, and the reading rises toward 1023. Using two 100 kΩ resistors (200 kΩ total) instead of the usual ~10 kΩ is what lets the hand feel light touches. Even a small drop in R_FSR produces a clear voltage change. The trade-off is that readings saturate sooner under heavy force.
 
 ## Firmware
 
