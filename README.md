@@ -4,6 +4,8 @@
 
 This project shows a simple, cheap way to give a robot hand a sense of touch with off-the-shelf force-sensitive resistors (FSRs). There's one round FSR on each fingertip and one square FSR on the palm. Each sensor feeds a voltage divider built from two 100 kΩ resistors, which makes the hand respond to light touches. An Arduino reads all six channels and streams them over serial.
 
+This work was originally built for testing tactile sensing in robot catching. Publication: [arXiv:2610.39044](https://arxiv.org/abs/2610.39044)
+
 **Parts**
 - 5× [round FSR, Pololu #1696](https://www.pololu.com/product/1696/) (fingertips)
 - 1× [square FSR, Pololu #1645](https://www.pololu.com/product/1645) (palm)
